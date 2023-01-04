@@ -95,6 +95,11 @@ jobs:
           path: build/${{ matrix.targetPlatform }}
   deployToSteam:
     needs: [buildForWindowsAndLinux]
+=======
+  buildWindows:
+    needs: testRunner
+    name: Build for Windows 🖥️
+>>>>>>> 3614f26af07ce1b4185030191c7997d1b6ac691d
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -106,6 +111,7 @@ jobs:
         with:
           name: Build-StandaloneWindows64
           path: build/StandaloneWindows64
+<<<<<<< HEAD
       - name: Download StandaloneLinux64 Artifact
         uses: actions/download-artifact@v2
         with:
@@ -124,3 +130,6 @@ jobs:
           depot1Path: StandaloneWindows64
           depot2Path: StandaloneLinux64
           releaseBranch: prerelease
+=======
+
+>>>>>>> 3614f26af07ce1b4185030191c7997d1b6ac691d
