@@ -57,79 +57,22 @@ jobs:
           name: Test results (${{ matrix.testMode }})
           path: ${{ steps.testRunner.outputs.artifactsPath }}
 
-  buildForWindowsAndLinux:
-    name: Build for ${{ matrix.targetPlatform }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        targetPlatform:
-          - StandaloneWindows64 # Build a Windows 64-bit standalone.
-          - StandaloneLinux64 # Build a Linux 64-bit standalone.
-    outputs:
-      buildVersion: ${{ steps.build.outputs.buildVersion }}
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          lfs: true
-      - uses: actions/cache@v2
-        with:
-          path: Library
-          key:
-            Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**',
-            'ProjectSettings/**') }}
-          restore-keys: |
-            Library-${{ matrix.targetPlatform }}-
-            Library-
-      - uses: game-ci/unity-builder@v2
-        id: build
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          targetPlatform: ${{ matrix.targetPlatform }}
-          versioning: Semantic
-      - uses: actions/upload-artifact@v2
-        with:
-          name: Build-${{ matrix.targetPlatform }}
-          path: build/${{ matrix.targetPlatform }}
   deployToSteam:
-    needs: [buildForWindowsAndLinux]
-=======
-  buildWindows:
-    needs: testRunner
-    name: Build for Windows 🖥️
->>>>>>> 3614f26af07ce1b4185030191c7997d1b6ac691d
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      - uses: CyberAndrii/steam-totp@v1
+        name: Generate TOTP
+        id: steam-totp
         with:
-          fetch-depth: 0
-      - name: Download StandaloneWindows64 Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: Build-StandaloneWindows64
-          path: build/StandaloneWindows64
-<<<<<<< HEAD
-      - name: Download StandaloneLinux64 Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: Build-StandaloneLinux64
-          path: build/StandaloneLinux64
+          shared_secret: ${{ secrets.STEAM_SHARED_SECRET }}
       - uses: game-ci/steam-deploy@v1
         with:
           username: ${{ secrets.STEAM_USERNAME }}
           password: ${{ secrets.STEAM_PASSWORD }}
-          configVdf: ${{ secrets.STEAM_CONFIG_VDF}}
-          ssfnFileName: ${{ secrets.STEAM_SSFN_FILE_NAME }}
-          ssfnFileContents: ${{ secrets.STEAM_SSFN_FILE_CONTENTS }}
-          appId: ${{ secrets.STEAM_APP_ID }}
-          buildDescription: v${{ needs.buildForWindowsAndLinux.outputs.buildVersion }}
+          totp: ${{ steps.steam-totp.outputs.code }}
+          appId: 1234560
+          buildDescription: v1.2.3
           rootPath: build
           depot1Path: StandaloneWindows64
           depot2Path: StandaloneLinux64
           releaseBranch: prerelease
-=======
-
->>>>>>> 3614f26af07ce1b4185030191c7997d1b6ac691d
